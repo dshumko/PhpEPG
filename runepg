@@ -1,0 +1,10 @@
+#!/bin/bash
+
+php parser.php
+php stream_maker.php
+
+php pack01.php
+
+killall php
+
+php udp01.php >/dev/null &

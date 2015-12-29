@@ -1,0 +1,4 @@
+#!/bin/bash
+
+php now_01.php
+php pack_now01.php
