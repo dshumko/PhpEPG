@@ -1,0 +1,21 @@
+#!/bin/bash
+
+php /var/tv24_epg/parser.php
+php /var/tv24_epg/stream_maker.php
+php /var/tv24_epg/pack01.php
+php /var/tv24_epg/pack02.php
+php /var/tv24_epg/pack03.php
+php /var/tv24_epg/pack04.php
+php /var/tv24_epg/pack05.php
+php /var/tv24_epg/pack06.php
+php /var/tv24_epg/pack07.php
+php /var/tv24_epg/pack08.php
+killall php
+php /var/tv24_epg/udp01.php >/dev/null &
+php /var/tv24_epg/udp02.php >/dev/null &
+php /var/tv24_epg/udp03.php >/dev/null &
+php /var/tv24_epg/udp04.php >/dev/null &
+php /var/tv24_epg/udp05.php >/dev/null &
+php /var/tv24_epg/udp06.php >/dev/null &
+php /var/tv24_epg/udp07.php >/dev/null &
+php /var/tv24_epg/udp08.php >/dev/null &

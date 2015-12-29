@@ -1,5 +1,5 @@
 <?php
-include "/var/epg/inc/includas.inc";
+include "/var/tv24_epg/inc/includas.inc";
 
 	$connf = mysql_connect($sqlhost, $mysqluser, $mysqlpass);
 	mysql_set_charset('cp1257',$connf);
@@ -19,17 +19,22 @@ include "/var/epg/inc/includas.inc";
 	$sqlin = 'UPDATE configas SET cnt = 0';
 	mysql_query($sqlin,$connf);
 
-$feit = fopen('/var/epg/eit_07.eit', "r");
-$fts = fopen('/var/epg/eit_07.ts', 'w');	
+$feit = fopen('/var/tv24_epg/eit_07.eit', "r");
+$fts = fopen('/var/tv24_epg/eit_07.ts', 'w');	
 $cnt = 0;
 $connf = array($connf, $fts);
 //fseek($feit, 2, SEEK_CUR);
 //$data = fread($feit, 1);
-while (ftell($feit) < filesize('/var/epg/eit_07.eit')) {
+while (ftell($feit) < filesize('/var/tv24_epg/eit_07.eit')) {
 
 $pirmdu = fread($feit, 2);
 $sekilgis = fread($feit, 2);
 $ilgis = hexdec(bin2hex($sekilgis)) - 61440;
+
+
+$hexilgis = unpack("H*", $sekilgis);
+//echo "Desimtainis ilgis - ".$ilgis." HEX ilgis - ".$hexilgis[1]."\n";
+
 $kartoti = floor($ilgis / 184);
 $likutis = $ilgis - (floor($ilgis / 184) * 184);
 $ffff = 184 - ($ilgis - (floor($ilgis / 184) * 184));
@@ -37,6 +42,10 @@ fseek($feit, -4, SEEK_CUR);
 //for ($i=0; $i<$kartoti; $i++){
 
 	$sekcija = fread($feit, $ilgis + 4);
+		if (!$sekcija) {
+		die('');
+	
+}
 
 	//echo bin2hex($pirmdu.$sekilgis.$sekcija)."\n----------------------------------------------\n";
 	
@@ -90,5 +99,5 @@ fclose($feit);
 fclose($fts);
 //}
 @mysql_close($connf);
-//include "./pack04.php";
+//exec ("php /var/epg/pack03.php");
 ?>

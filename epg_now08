@@ -1,0 +1,4 @@
+#!/bin/bash
+
+php /var/tv24_epg/now_08.php
+php /var/tv24_epg/pack_now08.php
