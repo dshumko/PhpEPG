@@ -1,0 +1,513 @@
+'\" t
+.\"     Title: pycrc
+.\"    Author: Thomas Pircher <tehpeh@gmx.net>
+.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
+.\"      Date: 2010-03-28
+.\"    Manual: pycrc
+.\"    Source: pycrc 0.7.5
+.\"  Language: English
+.\"
+.TH "PYCRC" "1" "2010\-03\-28" "pycrc 0.7.5" "pycrc"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+pycrc \- pycrc is a free, easy to use Cyclic Redundancy Check (CRC) calculator and source code generator\&.
+.SH "SYNOPSIS"
+.HP \w'\fBpycrc\fR\ 'u
+\fBpycrc\fR [OPTIONS]
+.SH "DESCRIPTION"
+.PP
+
+\m[blue]\fBpycrc\fR\m[]\&\s-2\u[1]\d\s+2
+provides a parametrised CRC reference implementation written in Python and a source code generator for C\&. The generated C source code can be optimised for simplicity, speed or tight memory constraints for embedded platforms\&. The following operations are implemented:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+generate the checksum of a string (ASCII or hex)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+generate the checksum of a file
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+generate the C header and source files for a client implementation\&.
+.RE
+.PP
+The following variants of the CRC algorithm are supported:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+
+\fIbit\-by\-bit\fR: the basic algorithm which operates individually on every bit of the augmented message (i\&.e\&. the input data with
+\fIWidth\fR
+0\-bits attached to the end)\&. This algorithm is the easiest to understand because it is a straightforward implementation of the basic polynomial division, but it is also the slowest among all possible variants\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+
+\fIbit\-by\-bit\-fast\fR: a variation of the simple
+\fIbit\-by\-bit\fR
+algorithm, with the difference that it does not need to augment the data, i\&.e\&. it does not add
+\fIWidth\fR
+zero bits at the end of the message\&. This algorithm might be a good choice for embedded platforms, where code space is a major concern\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+
+\fItable\-driven\fR: the standard table driven algorithm\&. This is the fastest variant because it operates on one byte at a time, as opposed to bits, and uses a look\-up table of 256 elements, which might not be feasible for small embedded systems, though\&. Anyway, the number of elements in the look\-up table can be reduced by means of the
+\fB\-\-table\-idx\-width\fR
+command line switch\&. By using 4 bits (16 elements in the look\-up table) a significant speed\-up can be measured with respect to the bit\-by\-bit algorithms\&.
+.RE
+.sp
+.SH "OPTIONS"
+.PP
+\fB\-\-version\fR
+.RS 4
+show program\*(Aqs version number and exit
+.RE
+.PP
+\fB\-h\fR, \fB\-\-help\fR
+.RS 4
+show this help message and exit
+.RE
+.PP
+\fB\-\-verbose\fR
+.RS 4
+be more verbose; in particular, print the value of the parameters and the chosen model
+.RE
+.PP
+\fB\-\-check\-string=\fR\fISTRING\fR
+.RS 4
+calculate the checksum of the given string (\*(Aq\fI123456789\fR\*(Aq default)
+.RE
+.PP
+\fB\-\-check\-hexstring=\fR\fISTRING\fR
+.RS 4
+calculate the checksum of the given hexadecimal string
+.RE
+.PP
+\fB\-\-check\-file=\fR\fIFILE\fR
+.RS 4
+calculate the checksum of the given file
+.RE
+.PP
+\fB\-\-generate=\fR\fICODE\fR
+.RS 4
+generate the source code type as a choice from {c, h, c\-main, table}
+.RE
+.PP
+\fB\-\-std=\fR\fISTD\fR
+.RS 4
+C standard style of the generated code from {C89, ANSI, C99}
+.RE
+.PP
+\fB\-\-algorithm=\fR\fIALGO\fR
+.RS 4
+choose an algorithm from {\fIbit\-by\-bit\fR,
+\fIbit\-by\-bit\-fast\fR,
+\fItable\-driven\fR,
+\fIall\fR}
+.RE
+.PP
+\fB\-\-model=\fR\fIMODEL\fR
+.RS 4
+choose a parameter set from {\fIcrc\-5\fR,
+\fIcrc\-8\fR,
+\fIdallas\-1\-wire\fR,
+\fIcrc\-15\fR,
+\fIcrc\-16\fR,
+\fIcrc\-16\-usb\fR,
+\fIcrc\-16\-modbus\fR,
+\fIccitt\fR,
+\fIr\-crc\-16\fR,
+\fIkermit\fR,
+\fIx\-25\fR,
+\fIxmodem\fR,
+\fIzmodem\fR,
+\fIcrc\-24\fR,
+\fIcrc\-32\fR,
+\fIcrc\-32c\fR,
+\fIcrc\-32mpeg\fR,
+\fIposix\fR,
+\fIjam\fR,
+\fIxfer\fR,
+\fIcrc\-64\fR,
+\fIcrc\-64\-jones\fR}
+.RE
+.PP
+\fB\-\-width=\fR\fINUM\fR
+.RS 4
+use
+\fINUM\fR
+bits in the
+\fIPolynomial\fR
+.RE
+.PP
+\fB\-\-poly=\fR\fIHEX\fR
+.RS 4
+use
+\fIHEX\fR
+as
+\fIPolynomial\fR
+.RE
+.PP
+\fB\-\-reflect\-in=\fR\fIBOOL\fR
+.RS 4
+reflect input bytes
+.RE
+.PP
+\fB\-\-xor\-in=\fR\fIHEX\fR
+.RS 4
+use
+\fIHEX\fR
+as initial value
+.RE
+.PP
+\fB\-\-reflect\-out=\fR\fIBOOL\fR
+.RS 4
+reflect output bytes
+.RE
+.PP
+\fB\-\-xor\-out=\fR\fIHEX\fR
+.RS 4
+xor the final CRC value with
+\fIHEX\fR
+.RE
+.PP
+\fB\-\-table\-idx\-width=\fR\fINUM\fR
+.RS 4
+use
+\fINUM\fR
+bits to index the CRC table;
+\fINUM\fR
+must be one of the values {\fI1\fR,
+\fI2\fR,
+\fI4\fR,
+\fI8\fR}
+.RE
+.PP
+\fB\-\-symbol\-prefix=\fR\fISTRING\fR
+.RS 4
+when generating source code, use
+\fISTRING\fR
+as prefix to the generated symbols
+.RE
+.PP
+\fB\-\-crc\-type=\fR\fISTRING\fR
+.RS 4
+when generating source code, use
+\fISTRING\fR
+as crc_t type
+.RE
+.PP
+\fB\-\-include\-file=\fR\fIFILE\fR
+.RS 4
+when generating source code, include also
+\fIFILE\fR
+as header file
+.RE
+.PP
+\fB\-o\fR\fIFILE\fR, \fB\-\-output=\fR\fIFILE\fR
+.RS 4
+write the generated code to
+\fIFILE\fR
+instead to stdout
+.RE
+.SH "THE CRC PARAMETRIC MODEL"
+.PP
+The parametric model follows Ross N\&. Williams\*(Aq convention described in
+\m[blue]\fBA Painless Guide to CRC Error Detection Algorithms\fR\m[]\&\s-2\u[2]\d\s+2, commonly called the Rocksoft Model\&. Since most people are familiar with this kind of parameters, pycrc follows this convention, described as follows:
+.PP
+\fIWidth\fR
+.RS 4
+The width of the CRC
+\fIPolynomial\fR, in number of bits\&. This is also the width of the final CRC result\&. Previous versions of pycrc only multiples of 8 could be be used as
+\fIWidth\fR
+for the
+\fItable\-driven\fR
+algorithm\&. As of version 0\&.7\&.5, any
+\fIWidth\fR
+is accepted on all algorithms\&.
+.RE
+.PP
+\fIPolynomial\fR
+.RS 4
+The unreflected polynomial of the CRC algorithm\&.
+.sp
+The
+\fIPolynomial\fR
+may be specified in its standard form, i\&.e\&. with bit
+\fIWidth\fR+1 set to 1, but the most significant bit may also be omitted\&. For example, for a
+\fIWidth\fR
+of 16, both forms 0x18005 and 0x8005 are accepted\&.
+.RE
+.PP
+\fIReflectIn\fR
+.RS 4
+Reflect the bytes of the message before processing them\&. A word is reflected by inverting the position of its bits with respect to the middle axis of the word\&. The reversed value of 0xa3 (10100010b) is 0x45 (01000101b), for example\&. Some CRC algorithms can be implemented more efficiently in a bit reversed version\&.
+.sp
+Reflected algorithms are more efficient than straight\-forward implementations, thus many of the standard algorithmic variants use reflected input bytes\&.
+.RE
+.PP
+\fIXorIn\fR
+.RS 4
+The initial value (usually all 0 or all 1) in the algorithms which operate on the non\-augmented message\&. This value can be seen as a value which will be XOR\-ed into the CRC register after
+\fIWidth\fR
+iterations of the
+\fIbit\-by\-bit\fR
+algorithm\&. This means the simple
+\fIbit\-by\-bit\fR
+algorithm must calculate the initial value using some sort of reverse CRC algorithm on the
+\fIXorIn\fR
+value\&.
+.RE
+.PP
+\fIReflectOut\fR
+.RS 4
+Reflect the final CRC result\&. This operation takes place before XOR\-ing the final CRC value with the
+\fIXorOut\fR
+parameter\&.
+.RE
+.PP
+\fIXorOut\fR
+.RS 4
+A value (usually all bits 0 or all 1) which will be XOR\-ed to the final CRC value\&.
+.RE
+.PP
+\fICheck\fR
+.RS 4
+This value is not exactly a parameter of a model but it is sometimes given together with the Rocksoft Model parameters\&. It is the CRC value of the parametrised model over the string "\fI123456789\fR" and may be used to validate an implementation\&.
+.RE
+.SH "CODE GENERATION"
+.PP
+In the default configuration, the generated code is strict ISO C99 code\&. A minimal set of three functions are defined for each algorithm:
+\fBcrc_init()\fR,
+\fBcrc_update()\fR
+and
+\fBcrc_finalize()\fR\&. According to the number of parameters given to pycrc, a different interface definition is generated\&. Fully parametrised models have a simpler API, while the generated code for runtime\-specified implementations adds a pointer to a configuration structure as first parameter to all functions\&.
+.PP
+The generated source code uses the type
+\fBcrc_t\fR, which is used throughout the code\&. It may be redefined in the generated header file\&.
+.SS "Fully parametrised models"
+.sp
+.ft B
+.nf
+#include <stdlib\&.h>
+typedef XXXX crc_t;             // this type is defined in the generated header file
+                
+.fi
+.ft
+.HP \w'crc_t\ crc_init('u
+.BI "crc_t crc_init(void);"
+.HP \w'crc_t\ crc_update('u
+.BI "crc_t crc_update(crc_t\ " "crc" ", const\ unsigned\ char\ *" "data" ", size_t\ " "data_len" ");"
+.HP \w'crc_t\ crc_finalize('u
+.BI "crc_t crc_finalize(crc_t\ " "crc" ");"
+.PP
+The following code snippet shows how to use the generated functions\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+#include "my_generated_crc\&.h"
+#include <stdio\&.h>
+
+int main(void)
+{
+    static const unsigned char str1[] = "1234";
+    static const unsigned char str2[] = "56789";
+    crc_t crc;
+
+    crc = crc_init();
+    crc = crc_update(crc, str1, sizeof(str1) \- 1);
+    crc = crc_update(crc, str2, sizeof(str2) \- 1);
+    // more calls to crc_update\&.\&.\&.
+    crc = crc_finalize(crc);
+
+    printf("0x%lx\en", (long)crc);
+    return 0;
+}
+            
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.SS "Models with runtime\-configurable parameters"
+.PP
+When the model is not fully defined then the missing parameters are contained in a structure of type
+\fBcrc_cfg_t\fR\&. The first argument of the CRC functions is a pointer to that structure, and its fields must be initialised properly by the user before the first call to the CRC functions\&. This structure contains three additional parameters,
+\fImsb_mask\fR,
+\fIcrc_mask\fR
+and
+\fIcrc_shift\fR, if the
+\fIWidth\fR
+was undefined when the code was generated\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+typedef struct {
+    unsigned int width;
+    crc_t poly;
+    bool reflect_in;
+    crc_t xor_in;
+    bool reflect_out;
+    crc_t xor_out;
+
+    // internal parameters
+    crc_t msb_mask;             // initialise as 1UL << (cfg\->width \- 1)
+    crc_t crc_mask;             // initialise as (cfg\->msb_mask \- 1) | cfg\->msb_mask
+    unsigned int crc_shift;     // initialise as cfg\->width < 8 ? 8 \- cfg\->width : 0
+} crc_cfg_t;
+            
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+
+\fImsb_mask\fR
+is a bitmask with the most significant bit of a
+\fIWidth\fR
+bits wide data type set to 1\&.
+\fIcrc_mask\fR
+is a bitmask with all bits of a
+\fIWidth\fR
+bits wide data type set to 1\&.
+\fIcrc_shift\fR
+is a shift counter that is used when
+\fIWidth\fR
+is less than 8\&. It is the number of bits to shift the CRC register to align its top bit at a byte boundary\&.
+.PP
+The file
+test/main\&.c
+in the source package of pycrc contains a fully featured example of how to use the generated source code\&. A shorter, more compact
+main()
+function can be generated with the
+\fI\-\-generate c\-main\fR
+option\&. This second variant is the better option when some of the CRC parameters are known and some are unknown during code generation\&.
+.SH "EXAMPLES"
+.PP
+.PP
+Calculate the CRC\-32 checksum of the string 123456789:
+.RS 4
+
+\fBpython pycrc\&.py \-\-model crc\-32 \-\-check\-string 123456789\fR
+.RE
+.PP
+Generate the source code of the table\-driven algorithm for an embedded application\&.
+.RS 4
+
+\fBpython pycrc\&.py \-\-model crc\-16 \-\-algorithm table\-driven \-\-table\-idx\-width 4 \-\-generate h \-o crc\&.h\fR
+.sp
+
+\fBpython pycrc\&.py \-\-model crc\-16 \-\-algorithm table\-driven \-\-table\-idx\-width 4 \-\-generate c \-o crc\&.c\fR
+.sp
+The table index width of 4 bits ensures a moderate memory consumption\&. In fact, the size of the resulting table is
+16 * sizeof(crc_t)
+bytes\&. A variant of the last generated output is the
+\fIc\-main\fR
+target: a simple
+\fImain()\fR
+function is generated in addition to the CRC routines:
+.sp
+
+\fBpython pycrc\&.py \-\-model crc\-16 \-\-algorithm table\-driven \-\-table\-idx\-width 4 \-\-generate c\-main \-o crc\&.c\fR
+.RE
+.PP
+Generate the CRC table only:
+.RS 4
+
+\fBpython pycrc\&.py \-\-model kermit \-\-generate table \-o crc\-table\&.txt\fR
+.RE
+.SH "HOMEPAGE"
+.PP
+pycrc can be downloaded from
+\m[blue]\fBhttp://www\&.tty1\&.net/pycrc/\fR\m[]\&.
+.SH "COPYRIGHT"
+.PP
+This work is licensed under a
+\m[blue]\fBCreative Commons Attribution\-Share Alike 3\&.0 Unported License\fR\m[]\&\s-2\u[3]\d\s+2\&.
+.SH "AUTHOR"
+.PP
+\fBThomas Pircher\fR <\&tehpeh@gmx\&.net\&>
+.RS 4
+Author of pycrc and this manual page\&.
+.RE
+.SH "NOTES"
+.IP " 1." 4
+pycrc
+.RS 4
+\%http://www.tty1.net/pycrc/
+.RE
+.IP " 2." 4
+A Painless Guide to CRC Error Detection Algorithms
+.RS 4
+\%http://www.ross.net/crc/crcpaper.html
+.RE
+.IP " 3." 4
+Creative Commons Attribution-Share Alike 3.0 Unported License
+.RS 4
+\%http://creativecommons.org/licenses/by-sa/3.0/
+.RE

@@ -1,0 +1,577 @@
+<?xml version='1.0'?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+                    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+<!ENTITY program_name       "pycrc">
+<!ENTITY program_version    "0.7.5">
+<!ENTITY date               "2010-03-28">
+<!ENTITY author_firstname   "Thomas">
+<!ENTITY author_surname     "Pircher">
+<!ENTITY author_email       "tehpeh@gmx.net">
+<!ENTITY author             "&author_firstname; &author_surname;">
+<!ENTITY bit-by-bit         "bit-by-bit">
+<!ENTITY bit-by-bit-fast    "bit-by-bit-fast">
+<!ENTITY table-driven       "table-driven">
+<!ENTITY width          "Width">
+<!ENTITY poly           "Polynomial">
+<!ENTITY reflect_in     "ReflectIn">
+<!ENTITY xor_in         "XorIn">
+<!ENTITY reflect_out    "ReflectOut">
+<!ENTITY xor_out        "XorOut">
+<!ENTITY check          "Check">
+]>
+
+<refentry id="&program_name;">
+
+    <refentryinfo>
+        <title>&program_name;</title>
+        <productname>&program_name;</productname>
+        <productnumber>&program_version;</productnumber>
+        <author>
+            <firstname>&author_firstname;</firstname>
+            <surname>&author_surname;</surname>
+            <contrib>Author of &program_name; and this manual page.</contrib>
+            <email>&author_email;</email>
+        </author>
+        <date>&date;</date>
+    </refentryinfo>
+
+    <refmeta>
+        <refentrytitle>&program_name;</refentrytitle>
+        <manvolnum>1</manvolnum>
+    </refmeta>
+
+    <refnamediv>
+        <refname>&program_name;</refname>
+        <refpurpose>&program_name; is a free, easy to use Cyclic Redundancy Check (CRC) calculator and source code generator.</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv>
+        <cmdsynopsis>
+            <command>&program_name;</command>
+            <arg>OPTIONS</arg>
+        </cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1><title>Description</title>
+        <para>
+            <ulink url="http://www.tty1.net/pycrc/">&program_name;</ulink>
+            provides a parametrised CRC reference implementation written in Python and a source code generator for C.
+            The generated C source code can be optimised for simplicity, speed or tight memory constraints for embedded platforms.
+
+            The following operations are implemented:
+            <itemizedlist>
+                <listitem>
+                    <para>
+                    generate the checksum of a string (ASCII or hex)
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                    generate the checksum of a file
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                    generate the C header and source files for a client implementation.
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </para>
+        <para>
+            The following variants of the CRC algorithm are supported:
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        <replaceable>&bit-by-bit;</replaceable>: the basic algorithm which operates individually on every bit of the augmented message 
+                        (i.e. the input data with <replaceable>&width;</replaceable> 0-bits attached to the end).
+                        This algorithm is the easiest to understand because it is a straightforward implementation of the basic polynomial division, 
+                        but it is also the slowest among all possible variants.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <replaceable>&bit-by-bit-fast;</replaceable>: a variation of the simple <replaceable>&bit-by-bit;</replaceable> algorithm, 
+                        with the difference that it does not need to augment the data, i.e. it does not add <replaceable>&width;</replaceable> zero 
+                        bits at the end of the message.
+                        This algorithm might be a good choice for embedded platforms, where code space is a major concern.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <replaceable>&table-driven;</replaceable>: the standard table driven algorithm.
+                        This is the fastest variant because it operates on one byte at a time, as opposed to bits, and uses a look-up table of 256 elements, 
+                        which might not be feasible for small embedded systems, though. Anyway, the number of elements in the look-up table can be reduced by 
+                        means of the <option>--table-idx-width</option> command line switch. By using 4 bits (16 elements in the look-up table) a significant 
+                        speed-up can be measured with respect to the bit-by-bit algorithms.
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </para>
+    </refsect1>
+
+    <refsect1><title>Options</title>
+    <variablelist>
+        <varlistentry>
+            <term>
+                <option>--version</option>
+            </term>
+            <listitem>
+                <para>show program's version number and exit</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>-h</option>
+            </term>
+            <term>
+                <option>--help</option>
+            </term>
+            <listitem>
+                <para>show this help message and exit</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--verbose</option>
+            </term>
+            <listitem>
+                <para>be more verbose; in particular, print the value of the parameters and the chosen model</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--check-string=</option><replaceable>STRING</replaceable>
+            </term>
+            <listitem>
+                <para>calculate the checksum of the given string ('<replaceable>123456789</replaceable>' default)</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--check-hexstring=</option><replaceable>STRING</replaceable>
+            </term>
+            <listitem>
+                <para>calculate the checksum of the given hexadecimal string</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--check-file=</option><replaceable>FILE</replaceable>
+            </term>
+            <listitem>
+                <para>calculate the checksum of the given file</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--generate=</option><replaceable>CODE</replaceable>
+            </term>
+            <listitem>
+                <para>generate the source code type as a choice from {c, h, c-main, table}</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--std=</option><replaceable>STD</replaceable>
+            </term>
+            <listitem>
+                <para>C standard style of the generated code from {C89, ANSI, C99}</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--algorithm=</option><replaceable>ALGO</replaceable>
+            </term>
+            <listitem>
+                <para>choose an algorithm from {<replaceable>bit-by-bit</replaceable>, <replaceable>bit-by-bit-fast</replaceable>, 
+                <replaceable>table-driven</replaceable>, <replaceable>all</replaceable>}</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--model=</option><replaceable>MODEL</replaceable>
+            </term>
+            <listitem>
+                <para>choose a parameter set from
+                   {<replaceable>crc-5</replaceable>, 
+                    <replaceable>crc-8</replaceable>, 
+                    <replaceable>dallas-1-wire</replaceable>, 
+                    <replaceable>crc-15</replaceable>,
+                    <replaceable>crc-16</replaceable>, 
+                    <replaceable>crc-16-usb</replaceable>,
+                    <replaceable>crc-16-modbus</replaceable>,
+                    <replaceable>ccitt</replaceable>, 
+                    <replaceable>r-crc-16</replaceable>, 
+                    <replaceable>kermit</replaceable>, 
+                    <replaceable>x-25</replaceable>, 
+                    <replaceable>xmodem</replaceable>, 
+                    <replaceable>zmodem</replaceable>, 
+                    <replaceable>crc-24</replaceable>,
+                    <replaceable>crc-32</replaceable>,
+                    <replaceable>crc-32c</replaceable>,
+                    <replaceable>crc-32mpeg</replaceable>,
+                    <replaceable>posix</replaceable>,
+                    <replaceable>jam</replaceable>,
+                    <replaceable>xfer</replaceable>,
+                    <replaceable>crc-64</replaceable>,
+                    <replaceable>crc-64-jones</replaceable>}</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--width=</option><replaceable>NUM</replaceable>
+            </term>
+            <listitem>
+                <para>use <replaceable>NUM</replaceable> bits in the <replaceable>&poly;</replaceable></para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--poly=</option><replaceable>HEX</replaceable>
+            </term>
+            <listitem>
+                <para>use <replaceable>HEX</replaceable> as <replaceable>&poly;</replaceable></para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--reflect-in=</option><replaceable>BOOL</replaceable>
+            </term>
+            <listitem>
+                <para>reflect input bytes</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--xor-in=</option><replaceable>HEX</replaceable>
+            </term>
+            <listitem>
+                <para>use <replaceable>HEX</replaceable> as initial value</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--reflect-out=</option><replaceable>BOOL</replaceable>
+            </term>
+            <listitem>
+                <para>reflect output bytes</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--xor-out=</option><replaceable>HEX</replaceable>
+            </term>
+            <listitem>
+                <para>xor the final CRC value with <replaceable>HEX</replaceable></para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--table-idx-width=</option><replaceable>NUM</replaceable>
+            </term>
+            <listitem>
+                <para>use <replaceable>NUM</replaceable> bits to index the CRC table; <replaceable>NUM</replaceable> must be one of the values
+                {<replaceable>1</replaceable>, <replaceable>2</replaceable>, <replaceable>4</replaceable>, <replaceable>8</replaceable>}</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--symbol-prefix=</option><replaceable>STRING</replaceable>
+            </term>
+            <listitem>
+                <para>when generating source code, use <replaceable>STRING</replaceable> as prefix to the generated symbols</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--crc-type=</option><replaceable>STRING</replaceable>
+            </term>
+            <listitem>
+                <para>when generating source code, use <replaceable>STRING</replaceable> as crc_t type</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--include-file=</option><replaceable>FILE</replaceable>
+            </term>
+            <listitem>
+                <para>when generating source code, include also <replaceable>FILE</replaceable> as header file</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>-o</option><replaceable>FILE</replaceable>
+            </term>
+            <term>
+                <option>--output=</option><replaceable>FILE</replaceable>
+            </term>
+            <listitem>
+                <para>write the generated code to <replaceable>FILE</replaceable> instead to stdout</para>
+            </listitem>
+        </varlistentry>
+    </variablelist>
+    </refsect1>
+
+    <refsect1><title>The CRC Parametric Model</title>
+        <para>
+            The parametric model follows Ross N. Williams' convention described in
+            <ulink url="http://www.ross.net/crc/crcpaper.html">A Painless Guide to CRC Error Detection Algorithms</ulink>,
+            commonly called the Rocksoft Model.
+            Since most people are familiar with this kind of parameters, &program_name; follows this convention, described as follows:
+            <glosslist>
+                <glossentry>
+                    <glossterm><replaceable>&width;</replaceable></glossterm>
+                    <glossdef>
+                        <para>
+                        The width of the CRC <replaceable>&poly;</replaceable>, in number of bits. This is also the width of the final CRC result. 
+                        Previous versions of &program_name; only multiples of 8 could be be used as <replaceable>&width;</replaceable> for the
+                        <replaceable>&table-driven;</replaceable> algorithm. As of version 0.7.5, any <replaceable>&width;</replaceable> is accepted
+                        on all algorithms.
+                        </para>
+                    </glossdef>
+                </glossentry>
+                <glossentry>
+                    <glossterm><replaceable>&poly;</replaceable></glossterm>
+                    <glossdef>
+                        <para>
+                        The unreflected polynomial of the CRC algorithm.
+                        </para>
+                        <para>
+                        The <replaceable>&poly;</replaceable> may be specified in its standard form, i.e. with bit <replaceable>&width;</replaceable>+1
+                        set to 1, but the most significant bit may also be omitted. For example, for a <replaceable>&width;</replaceable> of 16,
+                        both forms 0x18005 and 0x8005 are accepted.
+                        </para>
+                    </glossdef>
+                </glossentry>
+                <glossentry>
+                    <glossterm><replaceable>&reflect_in;</replaceable></glossterm>
+                    <glossdef>
+                        <para>
+                        Reflect the bytes of the message before processing them. A word is reflected by inverting the position of its bits with 
+                        respect to the middle axis of the word. 
+                        The reversed value of 0xa3 (10100010b) is 0x45 (01000101b), for example.
+                        Some CRC algorithms can be implemented more efficiently in a bit reversed version.
+                        </para>
+                        <para>
+                        Reflected algorithms are more efficient than straight-forward implementations, thus many of the standard algorithmic
+                        variants use reflected input bytes.
+                        </para>
+                    </glossdef>
+                </glossentry>
+                <glossentry>
+                    <glossterm><replaceable>&xor_in;</replaceable></glossterm>
+                    <glossdef>
+                        <para>
+                        The initial value (usually all 0 or all 1) in the algorithms which operate on the non-augmented message. 
+                        This value can be seen as a value which will be XOR-ed into the CRC register after <replaceable>&width;</replaceable> 
+                        iterations of the <replaceable>&bit-by-bit;</replaceable> algorithm. 
+                        This means the simple <replaceable>&bit-by-bit;</replaceable> algorithm must calculate the initial value using some sort of
+                        reverse CRC algorithm on the <replaceable>&xor_in;</replaceable> value.
+                        </para>
+                    </glossdef>
+                </glossentry>
+                <glossentry>
+                    <glossterm><replaceable>&reflect_out;</replaceable></glossterm>
+                    <glossdef>
+                        <para>
+                        Reflect the final CRC result. This operation takes place before XOR-ing the final CRC 
+                        value with the <replaceable>&xor_out;</replaceable> parameter.
+                        </para>
+                    </glossdef>
+                </glossentry>
+                <glossentry>
+                    <glossterm><replaceable>&xor_out;</replaceable></glossterm>
+                    <glossdef>
+                        <para>
+                        A value (usually all bits 0 or all 1) which will be XOR-ed to the final CRC value.
+                        </para>
+                    </glossdef>
+                </glossentry>
+                <glossentry>
+                    <glossterm><replaceable>&check;</replaceable></glossterm>
+                    <glossdef>
+                        <para>
+                        This value is not exactly a parameter of a model but it is sometimes given together with the Rocksoft Model parameters.
+                        It is the CRC value of the parametrised model over the string "<replaceable>123456789</replaceable>" and
+                        may be used to validate an implementation.
+                        </para>
+                    </glossdef>
+                </glossentry>
+            </glosslist>
+        </para>
+    </refsect1>
+
+    <refsect1><title>Code generation</title>
+        <para>
+        In the default configuration, the generated code is strict ISO C99 code.
+        A minimal set of three functions are defined for each algorithm:
+        <function>crc_init()</function>, <function>crc_update()</function> and <function>crc_finalize()</function>.
+        According to the number of parameters given to &program_name;, a different interface definition is generated.
+        Fully parametrised models have a simpler API, while the generated code for runtime-specified implementations adds a 
+        pointer to a configuration structure as first parameter to all functions.
+        </para>
+        <para>
+        The generated source code uses the type <type>crc_t</type>, which is used throughout the code. It may be redefined in the generated header file.
+        </para>
+
+        <refsect2><title>Fully parametrised models</title>
+            <funcsynopsis>
+                <funcsynopsisinfo>
+#include &lt;stdlib.h&gt;
+typedef XXXX crc_t;             // this type is defined in the generated header file
+                </funcsynopsisinfo>
+                <funcprototype>
+                    <?dbhtml funcsynopsis-style='ansi'?>
+                    <funcdef>crc_t <function>crc_init</function></funcdef>
+                    <void/>
+                </funcprototype>
+
+                <funcprototype>
+                    <?dbhtml funcsynopsis-style='ansi'?>
+                    <funcdef>crc_t <function>crc_update</function></funcdef>
+                    <paramdef>crc_t <parameter>crc</parameter></paramdef>
+                    <paramdef>const unsigned char *<parameter>data</parameter></paramdef>
+                    <paramdef>size_t <parameter>data_len</parameter></paramdef>
+                </funcprototype>
+
+                <funcprototype>
+                    <?dbhtml funcsynopsis-style='ansi'?>
+                    <funcdef>crc_t <function>crc_finalize</function></funcdef>
+                    <paramdef>crc_t <parameter>crc</parameter></paramdef>
+                </funcprototype>
+            </funcsynopsis>
+
+            <para>
+            The following code snippet shows how to use the generated functions.
+            <programlisting>
+#include "my_generated_crc.h"
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    static const unsigned char str1[] = "1234";
+    static const unsigned char str2[] = "56789";
+    crc_t crc;
+
+    crc = crc_init();
+    crc = crc_update(crc, str1, sizeof(str1) - 1);
+    crc = crc_update(crc, str2, sizeof(str2) - 1);
+    // more calls to crc_update...
+    crc = crc_finalize(crc);
+
+    printf("0x%lx\n", (long)crc);
+    return 0;
+}
+            </programlisting>
+            </para>
+        </refsect2>
+
+        <refsect2><title>Models with runtime-configurable parameters</title>
+            <para>
+            When the model is not fully defined then the missing parameters are contained in a structure of 
+            type <type>crc_cfg_t</type>.
+            The first argument of the CRC functions is a pointer to that structure, and its fields must be initialised
+            properly by the user before the first call to the CRC functions.
+            This structure contains three additional parameters, <parameter>msb_mask</parameter>, <parameter>crc_mask</parameter>
+            and <parameter>crc_shift</parameter>, if the <replaceable>&width;</replaceable> was undefined when the code was generated.
+            <programlisting>
+typedef struct {
+    unsigned int width;
+    crc_t poly;
+    bool reflect_in;
+    crc_t xor_in;
+    bool reflect_out;
+    crc_t xor_out;
+
+    // internal parameters
+    crc_t msb_mask;             // initialise as 1UL &lt;&lt; (cfg-&gt;width - 1)
+    crc_t crc_mask;             // initialise as (cfg-&gt;msb_mask - 1) | cfg-&gt;msb_mask
+    unsigned int crc_shift;     // initialise as cfg-&gt;width &lt; 8 ? 8 - cfg-&gt;width : 0
+} crc_cfg_t;
+            </programlisting>
+            </para>
+            <para>
+            <parameter>msb_mask</parameter> is a bitmask with the most significant bit of a <replaceable>&width;</replaceable> bits
+            wide data type set to 1.
+            <parameter>crc_mask</parameter> is a bitmask with all bits of a <replaceable>&width;</replaceable> bits
+            wide data type set to 1.
+            <parameter>crc_shift</parameter> is a shift counter that is used when <replaceable>&width;</replaceable> is less than 8.
+            It is the number of bits to shift the CRC register to align its top bit at a byte boundary.
+            </para>
+
+            <para>
+            The file <filename>test/main.c</filename> in the source package of &program_name; contains a fully featured example
+            of how to use the generated source code.
+            A shorter, more compact <code>main()</code> function can be generated with the <replaceable>--generate c-main</replaceable>
+            option.
+            This second variant is the better option when some of the CRC parameters are known and some are unknown during code generation.
+            </para>
+        </refsect2>
+    </refsect1>
+
+    <refsect1><title>Examples</title>
+        <para>
+            <glosslist>
+                <glossentry>
+                    <glossterm>Calculate the CRC-32 checksum of the string 123456789:</glossterm>
+                    <glossdef>
+                        <para>
+                        <userinput>python pycrc.py --model crc-32 --check-string 123456789</userinput>
+                        </para>
+                    </glossdef>
+                </glossentry>
+                <glossentry>
+                    <glossterm>Generate the source code of the table-driven algorithm for an embedded application.</glossterm>
+                    <glossdef>
+                        <para>
+                        <userinput>python pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate h -o crc.h</userinput>
+                        </para>
+                        <para>
+                        <userinput>python pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate c -o crc.c</userinput>
+                        </para>
+                        <para>
+                        The table index width of 4 bits ensures a moderate memory consumption.
+                        In fact, the size of the resulting table is <code>16 * sizeof(crc_t)</code> bytes.
+                        A variant of the last generated output is the <replaceable>c-main</replaceable> target:
+                        a simple <replaceable>main()</replaceable> function is generated in addition to the CRC routines:
+                        </para>
+                        <para>
+                        <userinput>python pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate c-main -o crc.c</userinput>
+                        </para>
+                    </glossdef>
+                </glossentry>
+                <glossentry>
+                    <glossterm>Generate the CRC table only:</glossterm>
+                    <glossdef>
+                        <para>
+                        <userinput>python pycrc.py --model kermit --generate table -o crc-table.txt</userinput>
+                        </para>
+                    </glossdef>
+                </glossentry>
+            </glosslist>
+        </para>
+    </refsect1>
+
+    <refsect1><title>Homepage</title>
+        <para>
+            &program_name; can be downloaded from <ulink url="http://www.tty1.net/pycrc/">http://www.tty1.net/pycrc/</ulink>.
+        </para>
+    </refsect1>
+
+    <!--
+    <refsect1><title>Author</title>
+        <para>
+            Written by &author; <email>&author_email;</email>.
+        </para>
+    </refsect1>
+    -->
+
+    <refsect1><title>Copyright</title>
+        <para>
+            This work is licensed under a 
+            <ulink url="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-Share Alike 3.0 Unported License</ulink>.
+        </para>
+    </refsect1>
+
+</refentry>
+
