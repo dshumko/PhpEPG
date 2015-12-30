@@ -1,0 +1,70 @@
+﻿--
+-- Скрипт сгенерирован Devart dbForge Studio for MySQL, Версия 6.3.358.0
+-- Домашняя страница продукта: http://www.devart.com/ru/dbforge/mysql/studio
+--
+-- 
+-- 
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+
+-- 
+-- 
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+
+SET NAMES 'utf8';
+
+USE epg;
+
+DROP TABLE IF EXISTS configas;
+CREATE TABLE configas (
+  cnt INT(11) DEFAULT NULL,
+  now_ver INT(11) DEFAULT NULL,
+  failas VARCHAR(255) DEFAULT NULL
+)
+ENGINE = INNODB
+CHARACTER SET utf8
+COLLATE utf8_general_ci;
+
+DROP TABLE IF EXISTS epg_kan;
+CREATE TABLE epg_kan (
+  ext_pid VARCHAR(255) DEFAULT NULL,
+  esid INT(11) DEFAULT NULL,
+  pid INT(11) DEFAULT NULL,
+  NAME VARCHAR(50) DEFAULT NULL
+)
+ENGINE = INNODB
+CHARACTER SET utf8
+COLLATE utf8_general_ci;
+
+DROP TABLE IF EXISTS epg_sched;
+CREATE TABLE epg_sched (
+  ext_pid VARCHAR(255) DEFAULT NULL,
+  estart DATETIME DEFAULT NULL,
+  estop DATETIME DEFAULT NULL,
+  title VARCHAR(255) DEFAULT NULL,
+  title_lang VARCHAR(5) DEFAULT NULL,
+  edesc VARCHAR(500) DEFAULT NULL,
+  edesc_lang VARCHAR(5) DEFAULT NULL
+)
+ENGINE = INNODB
+AVG_ROW_LENGTH = 1028
+CHARACTER SET utf8
+COLLATE utf8_general_ci;
+
+DROP TABLE IF EXISTS epg_sid;
+CREATE TABLE epg_sid (
+  version INT(11) DEFAULT NULL,
+  esid INT(11) DEFAULT NULL,
+  eit_file VARCHAR(255) DEFAULT NULL
+)
+ENGINE = INNODB
+AVG_ROW_LENGTH = 16384
+CHARACTER SET utf8
+COLLATE utf8_general_ci;
+
+-- 
+-- 
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+
+-- 
+-- 
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
